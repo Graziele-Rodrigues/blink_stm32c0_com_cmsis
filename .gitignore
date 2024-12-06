@@ -1,0 +1,25 @@
+# Ignorar a pasta build
+build/
+
+# Ignorar arquivos de compilação
+*.o
+*.a
+*.so
+*.out
+*.exe
+
+# Ignorar arquivos temporários
+*.swp
+*.tmp
+*.log
+*.bak
+
+# Ignorar arquivos gerados por IDEs
+*.vscode/
+*.idea/
+*.cproject
+*.project
+
+# Ignorar binários
+bin/
+obj/
