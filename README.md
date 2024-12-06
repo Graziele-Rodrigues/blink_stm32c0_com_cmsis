@@ -125,6 +125,3 @@ sudo openocd -f interface/stlink.cfg -f target/stm32c0x.cfg
 
 Este projeto está licenciado sob a [MIT License](LICENSE).
 
---- 
-
-Com essa estrutura, o README deve atender bem às necessidades de uso e manutenção do projeto. 😊
