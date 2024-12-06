@@ -1,53 +1,41 @@
-firmware.elf: src/main.o src/startup_stm32c011xx.o src/system_stm32c0xx.o
-	arm-none-eabi-gcc \
-		src/main.o \
-		src/startup_stm32c011xx.o \
-		src/system_stm32c0xx.o \
-		-specs=nosys.specs \
-		-T STM32C011F6PX_FLASH.ld \
-		-mcpu=cortex-m0 \
-		-mthumb \
-		-o build/firmware.elf \
-		-g
+# Compilador e linker
+CC := arm-none-eabi-gcc
 
-src/main.o: src/main.c
-	arm-none-eabi-gcc \
-		src/main.c \
-		-specs=nosys.specs \
-		-Istm/CMSIS/Device/ST/STM32C0xx/Include \
-		-Istm/CMSIS/Include \
-		-DSTM32C011xx \
-		-mcpu=cortex-m0 \
-		-mthumb \
-		-Os \
-		-o src/main.o \
-		-g -c
+# Flags de compilação
+CFLAGS := -mcpu=cortex-m0 -mthumb -Os -g -DSTM32C011xx \
+          -Istm/CMSIS/Device/ST/STM32C0xx/Include \
+          -Istm/CMSIS/Include -specs=nosys.specs
+LDFLAGS := -mcpu=cortex-m0 -mthumb -T STM32C011F6PX_FLASH.ld -specs=nosys.specs
 
-src/startup_stm32c011xx.o: src/startup_stm32c011xx.s 
-	arm-none-eabi-gcc \
-		src/startup_stm32c011xx.s \
-		-specs=nosys.specs \
-		-Istm/CMSIS/Device/ST/STM32C0xx/Include \
-		-Istm/CMSIS/Include \
-		-DSTM32C011xx \
-		-mcpu=cortex-m0 \
-		-mthumb \
-		-Os \
-		-o src/startup_stm32c011xx.o \
-		-g -c
+# Diretórios
+SRC_DIR := src
+BUILD_DIR := build
+OBJ_DIR := $(BUILD_DIR)/obj
 
-src/system_stm32c0xx.o: src/system_stm32c0xx.c
-	arm-none-eabi-gcc \
-		src/system_stm32c0xx.c \
-		-specs=nosys.specs \
-		-Istm/CMSIS/Device/ST/STM32C0xx/Include \
-		-Istm/CMSIS/Include \
-		-DSTM32C011xx \
-		-mcpu=cortex-m0 \
-		-mthumb \
-		-Os \
-		-o src/system_stm32c0xx.o \
-		-g -c
+# Arquivos
+SRCS := $(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*.s)
+OBJS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(patsubst $(SRC_DIR)/%.s,$(OBJ_DIR)/%.o,$(SRCS)))
+TARGET := $(BUILD_DIR)/firmware.elf
 
+# Regras
+all: $(TARGET)
+
+# Geração do ELF
+$(TARGET): $(OBJS)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(OBJS) $(LDFLAGS) -o $@
+
+# Regras para objetos
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.s
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Limpeza
 clean:
-	rm -f firmware.elf firmware.bin src/*.o
+	rm -rf $(BUILD_DIR)
+
+.PHONY: all clean
